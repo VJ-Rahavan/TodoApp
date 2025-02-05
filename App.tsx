@@ -1,3 +1,4 @@
+import {NavigationContainer} from '@react-navigation/native';
 import CardItem from 'components/card-item/CardItem';
 import React, {useState} from 'react';
 import {
@@ -8,54 +9,22 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import AuthProvider from 'redux/store';
+import MyStack from 'screens/root/RootScreen';
 
 type TodoType = {id: string; text: string};
 type FlatListProp = {item: TodoType};
 
 const App = () => {
-  const [todo, setTodo] = useState<TodoType[]>([]);
-  const [newTodo, setNewTodo] = useState('');
-
-  const handleAddTodo = () => {
-    const newText = newTodo.trim();
-    if (newText) {
-      setTodo(prev => [...prev, {id: Date.now().toString(), text: newText}]);
-      setNewTodo('');
-    }
-  };
-
-  const handleDeleteTodo = (id: string) => {
-    setTodo(prev => prev.filter(todo => todo.id !== id));
-  };
-
-  const renderItem = ({item}: FlatListProp) => {
-    return (
-      <CardItem
-        handleDeleteTodo={handleDeleteTodo.bind(null, item.id)}
-        item={item}
-      />
-    );
-  };
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>To-Do List</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Add new todo"
-        value={newTodo}
-        onChangeText={setNewTodo}
-      />
-
-      <Button title="Add Todo" onPress={handleAddTodo} />
-
-      <FlatList
-        data={todo}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-      />
-    </View>
+    <SafeAreaProvider style={{flex: 1}}>
+      <AuthProvider>
+        <NavigationContainer>
+          <MyStack />
+        </NavigationContainer>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 };
 
