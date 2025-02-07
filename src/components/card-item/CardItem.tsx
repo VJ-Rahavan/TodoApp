@@ -1,15 +1,10 @@
 import {useNavigation} from '@react-navigation/native';
-import React from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableNativeFeedback,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
-type TodoType = {id: string; text: string};
+import React, {useContext} from 'react';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {AuthContext} from 'redux/store';
+import {HomeScreenNavigationProp} from 'src/types/navigation-types';
+import {TodoType} from 'src/types/store-types';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 type CardItemType = {
   item: TodoType;
@@ -17,7 +12,9 @@ type CardItemType = {
 };
 
 const CardItem: React.FC<CardItemType> = ({item, handleDeleteTodo}) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const {storeSelectedData} = useContext(AuthContext);
+
   return (
     <Pressable
       style={{
@@ -29,37 +26,51 @@ const CardItem: React.FC<CardItemType> = ({item, handleDeleteTodo}) => {
         color: '#FFFFFF60',
       }}
       onPress={() => {
+        storeSelectedData(item);
         navigation.navigate('Profile');
       }}>
       <View style={styles.todoItem}>
         <View
           style={{
-            backgroundColor: '#F00',
-            alignSelf: 'flex-start',
-            paddingVertical: 3,
-            paddingHorizontal: 10,
-            borderRadius: 18,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}>
-          <Text style={{color: '#FFF'}}>{item.text}</Text>
+          <View
+            style={{
+              backgroundColor: item.isCompleted ? '#00640020' : '#F0000020',
+              alignSelf: 'flex-start',
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              borderRadius: 18,
+            }}>
+            <Text style={{color: '#000', fontWeight: '500'}}>
+              {item.isCompleted ? 'Completed' : 'Incomplete'}
+            </Text>
+          </View>
+
+          <View>
+            <MaterialIcons
+              name={item.notify ? 'notifications-active' : 'notification-add'}
+              size={22}
+              color={'darkgreen'}
+            />
+          </View>
         </View>
 
-        <View style={{marginTop: 5}}>
-          <Text style={{fontSize: 22, fontWeight: '600'}}>
-            Salon App Wireframe
-          </Text>
-        </View>
+        <View style={{flex: 1}}>
+          <View style={{marginTop: 5}}>
+            <Text style={{fontSize: 22, fontWeight: '600'}}>{item.title}</Text>
+          </View>
 
-        <View style={{marginTop: 1}}>
-          <Text numberOfLines={2} style={{}}>
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Amet
-            laborum temporibus ducimus! Quos animi dicta nulla sit repellat
-            excepturi sint est quae eos asperiores natus mollitia dolores
-            doloribus, quis ad!
-          </Text>
+          <View style={{marginTop: 1}}>
+            <Text numberOfLines={2} style={{color: '#000'}}>
+              {item.description}
+            </Text>
+          </View>
         </View>
-
         <View style={{marginTop: 10}}>
-          <Text>{'12/11/2028'}</Text>
+          <Text>{item.date}</Text>
         </View>
       </View>
     </Pressable>

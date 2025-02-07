@@ -8,6 +8,7 @@ import {
   StorageType,
   TodoType,
 } from 'src/types/store-types';
+import {defaultTodoValue} from 'utils/constants';
 
 const storeData = async (key: StorageType, value: ObjType) => {
   try {
@@ -31,15 +32,8 @@ export const AuthContext = createContext<ContextType>({
   todo: [],
   modifyTodoList: (param: TodoType, type: ModifyTodoType) => {},
   updateUserPreference: (key: string, value: string | boolean) => {},
-  storeSelectedData: (param: TodoType) => {},
-  selectedTodoData: {
-    id: '',
-    text: '',
-    date: '',
-    description: '',
-    notify: false,
-    time: '',
-  },
+  storeSelectedData: (param: TodoType | null) => {},
+  selectedTodoData: defaultTodoValue,
 });
 
 interface IAuthProvider {
@@ -53,7 +47,6 @@ const AuthProvider: React.FC<IAuthProvider> = ({children}): JSX.Element => {
     null,
   );
 
-  // Load user data from AsyncStorage on app startup
   useEffect(() => {
     const loadUserData = async () => {
       try {

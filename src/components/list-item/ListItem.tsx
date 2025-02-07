@@ -1,7 +1,6 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-
-type TodoType = {id: string; text: string};
+import {TodoType} from 'src/types/store-types';
 
 type CardItemType = {
   item: TodoType;
@@ -11,7 +10,7 @@ type CardItemType = {
 const ListItem: React.FC<CardItemType> = ({item, handleDeleteTodo}) => {
   return (
     <View style={styles.todoItem}>
-      <Text>{item.text}</Text>
+      <Text>{item.title}</Text>
       <TouchableOpacity onPress={handleDeleteTodo}>
         <Text style={styles.deleteButton}>Delete</Text>
       </TouchableOpacity>

@@ -2,11 +2,11 @@ export type StorageType = 'USER_PREFERENCE' | 'TODO_DATA';
 
 export type TodoType = {
   id: string;
-  text: string;
+  title: string;
   description: string;
   date: string;
-  time: string;
   notify: boolean;
+  isCompleted: boolean;
 };
 
 export type EmptyObjType = {[key: string]: string | boolean};
@@ -19,7 +19,7 @@ export type ContextType = {
   todo: TodoType[];
   modifyTodoList: (param: TodoType, type: ModifyTodoType) => void;
   updateUserPreference: (key: string, value: string | boolean) => void;
-  storeSelectedData: (param: TodoType) => void;
+  storeSelectedData: (param: TodoType | null) => void;
   selectedTodoData: TodoType | null;
 };
 

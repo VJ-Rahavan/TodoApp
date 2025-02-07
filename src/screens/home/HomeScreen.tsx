@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native';
 import CardItem from 'components/card-item/CardItem';
-import React, {useContext, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -23,35 +23,63 @@ import {FlatListProp, TodoType} from 'src/types/store-types';
 import {colors} from 'utils/constants';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import ListItem from 'components/list-item/ListItem';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+import {HomeScreenNavigationProp} from 'src/types/navigation-types';
 
 const HomeScreen = () => {
   const {todo, modifyTodoList} = useContext(AuthContext);
+
+  const [searchTodo, setSearchTodo] = useState([...todo]);
 
   const {height} = useWindowDimensions();
   const [searchText, setSearchText] = useState('');
   const animatedHeight = useSharedValue(height * 0.4);
 
-  const onSearch = (data: string) => {
-    setSearchText(data);
-  };
+  const [isShowCards, setIsShowCards] = useState(true);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const handleDeleteTodo = (item: TodoType) => {
     modifyTodoList(item, 'DELETE');
   };
 
-  const renderItem = ({item}: FlatListProp) => {
-    if (!item.text.toLowerCase().includes(searchText.toLowerCase())) {
-      return <></>;
+  const onSearchHandle = (text: string) => {
+    if (text === '') {
+      setSearchTodo([...todo]);
+    } else {
+      const filteredResults = todo.filter(item =>
+        item.title.toLowerCase().includes(text.toLowerCase()),
+      );
+      setSearchTodo(filteredResults);
     }
-    return (
-      <CardItem
-        handleDeleteTodo={handleDeleteTodo.bind(null, item)}
-        item={item}
-      />
-    );
+    setSearchText(text);
   };
+
+  useEffect(() => {
+    onSearchHandle(searchText);
+  }, [todo]);
+
+  const renderItem = useCallback(
+    ({item}: FlatListProp) => {
+      return (
+        <>
+          {isShowCards ? (
+            <CardItem
+              handleDeleteTodo={handleDeleteTodo.bind(null, item)}
+              item={item}
+            />
+          ) : (
+            <ListItem
+              handleDeleteTodo={handleDeleteTodo.bind(null, item)}
+              item={item}
+            />
+          )}
+        </>
+      );
+    },
+    [isShowCards],
+  );
 
   const animatedTextStyle = useAnimatedStyle(() => {
     const scale = interpolateColor(
@@ -74,7 +102,7 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <Animated.View
         style={[styles.backgroundWallPaper, bgStyle]}></Animated.View>
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{flex: 1}} edges={['top']}>
         <View
           style={{
             flexDirection: 'row',
@@ -129,10 +157,11 @@ const HomeScreen = () => {
               paddingHorizontal: 10,
             }}
             placeholder="Search..."
-            onChangeText={onSearch}
+            onChangeText={onSearchHandle}
           />
           <TouchableOpacity
             onPress={() => {
+              setIsShowCards(!isShowCards);
               if (animatedHeight.value !== height)
                 animatedHeight.value = withTiming(height, {duration: 600});
               else
@@ -151,13 +180,16 @@ const HomeScreen = () => {
             <FontAwesome5 name="sort" size={25} color="#FFF" />
           </TouchableOpacity>
         </View>
-        {todo.length > 0 ? (
+        {searchTodo.length > 0 ? (
           <View style={{flex: 1, marginTop: 30}}>
             <FlatList
-              data={todo}
+              data={searchTodo}
               keyExtractor={item => item.id}
               renderItem={renderItem}
-              contentContainerStyle={{paddingHorizontal: 20}}
+              contentContainerStyle={{paddingHorizontal: 20, paddingBottom: 20}}
+              initialNumToRender={20}
+              windowSize={15}
+              keyboardDismissMode="on-drag"
             />
           </View>
         ) : (
@@ -182,6 +214,105 @@ const HomeScreen = () => {
             </Animated.Text>
           </View>
         )}
+
+        <View
+          style={{
+            height: 80,
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            paddingTop: 10,
+            backgroundColor: '#FFF',
+          }}>
+          <TouchableOpacity style={styles.bottomIcon}>
+            <Icon name="house" size={30} />
+            <Text>Home</Text>
+          </TouchableOpacity>
+          <View style={styles.bottomIcon}></View>
+          <Animated.View
+            style={[
+              {
+                position: 'absolute',
+                top: -40,
+                width: 80,
+                alignItems: 'center',
+                borderRadius: 40,
+                height: 80,
+                justifyContent: 'center',
+                // backgroundColor: '#F3F3F3',
+                // borderTopWidth: 2,
+              },
+              // bgColorStyle,
+            ]}>
+            {/* <View
+              style={{
+                position: 'absolute',
+                top: 40,
+                right: -40,
+                backgroundColor: '#f3f3f3',
+                width: 40,
+                height: 40,
+              }}>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  backgroundColor: '#Fff',
+                  width: 45,
+                  height: 40,
+                  borderTopLeftRadius: 20,
+                }}></View>
+            </View>
+            <View
+              style={{
+                position: 'absolute',
+                top: 40,
+                left: -40,
+                backgroundColor: '#f3f3f3',
+                width: 40,
+                height: 40,
+              }}>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  backgroundColor: '#Fff',
+                  width: 45,
+                  height: 40,
+                  borderTopRightRadius: 20,
+                }}></View>
+            </View> */}
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Profile');
+              }}
+              activeOpacity={0.4}
+              style={[
+                styles.bottomIcon,
+                {
+                  backgroundColor: isShowCards
+                    ? colors.primaryColor
+                    : '#f3f3f3',
+                  width: 60,
+                  alignItems: 'center',
+                  borderRadius: 40,
+                  height: 60,
+                  justifyContent: 'center',
+                },
+              ]}>
+              <Icon
+                name="plus"
+                size={30}
+                color={isShowCards ? '#FFF' : '#000'}
+              />
+            </TouchableOpacity>
+          </Animated.View>
+          <TouchableOpacity style={styles.bottomIcon}>
+            <MaterialIcon name="settings" size={30} />
+            <Text>Settings</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -190,7 +321,11 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#f3f3f3',
+  },
+  bottomIcon: {
+    height: 50,
+    alignItems: 'center',
   },
   backgroundWallPaper: {
     width: '100%',

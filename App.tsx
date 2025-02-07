@@ -13,9 +13,6 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AuthProvider from 'redux/store';
 import MyStack from 'screens/root/RootScreen';
 
-type TodoType = {id: string; text: string};
-type FlatListProp = {item: TodoType};
-
 const App = () => {
   return (
     <SafeAreaProvider style={{flex: 1}}>
